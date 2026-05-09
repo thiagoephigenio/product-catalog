@@ -14,6 +14,7 @@ export class Product extends BaseEntity {
   private _description?: string;
   private _status!: ProductStatus;
   private _attributes!: ProductAttribute[];
+  private _categoryIds!: string[];
 
   private constructor() {
     super();
@@ -26,6 +27,7 @@ export class Product extends BaseEntity {
     product._description = props.description;
     product._status = ProductStatus.DRAFT;
     product._attributes = [];
+    product._categoryIds = [];
     product._createdAt = new Date();
     product._updatedAt = new Date();
 
@@ -53,5 +55,9 @@ export class Product extends BaseEntity {
 
   get attributes(): ProductAttribute[] {
     return [...this._attributes];
+  }
+
+  get categoryIds(): string[] {
+    return [...this._categoryIds];
   }
 }
