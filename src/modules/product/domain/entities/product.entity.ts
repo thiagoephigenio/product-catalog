@@ -5,6 +5,8 @@ import { ProductAttribute } from './product-attribute.vo';
 import { ProductCreatedEvent } from '../events/product-created.event';
 import { ProductActivatedEvent } from '../events/product-activated.event';
 import { ProductArchivedEvent } from '../events/product-archived.event';
+import { CategoryAddedEvent } from '../events/category-added.event';
+import { CategoryRemovedEvent } from '../events/category-removed.event';
 import { AttributeAddedEvent } from '../events/attribute-added.event';
 import { AttributeUpdatedEvent } from '../events/attribute-updated.event';
 import { AttributeRemovedEvent } from '../events/attribute-removed.event';
@@ -71,6 +73,29 @@ export class Product extends BaseEntity {
     this._status = ProductStatus.ARCHIVED;
     this._updatedAt = new Date();
     this.addDomainEvent(new ProductArchivedEvent(this._id));
+  }
+
+  addCategory(categoryId: string): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ProductArchivedException();
+    }
+    if (this._categoryIds.includes(categoryId)) {
+      return;
+    }
+
+    this._categoryIds.push(categoryId);
+    this._updatedAt = new Date();
+    this.addDomainEvent(new CategoryAddedEvent(this._id, categoryId));
+  }
+
+  removeCategory(categoryId: string): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ProductArchivedException();
+    }
+
+    this._categoryIds = this._categoryIds.filter((id) => id !== categoryId);
+    this._updatedAt = new Date();
+    this.addDomainEvent(new CategoryRemovedEvent(this._id, categoryId));
   }
 
   addAttribute(key: string, value: string): void {
