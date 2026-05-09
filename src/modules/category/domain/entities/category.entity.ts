@@ -1,8 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { BaseEntity } from '../../../../shared/domain/base-entity';
 import { CategoryCreatedEvent } from '../events/category-created.event';
+import { CategoryUpdatedEvent } from '../events/category-updated.event';
+import { SelfParentException } from '../exceptions/self-parent.exception';
 
 interface CreateCategoryProps {
+  name: string;
+  parentId?: string;
+}
+
+interface UpdateCategoryProps {
   name: string;
   parentId?: string;
 }
@@ -28,6 +35,18 @@ export class Category extends BaseEntity {
     );
 
     return category;
+  }
+
+  update(props: UpdateCategoryProps): void {
+    if (props.parentId === this._id) {
+      throw new SelfParentException();
+    }
+
+    this._name = props.name;
+    this._parentId = props.parentId;
+    this._updatedAt = new Date();
+
+    this.addDomainEvent(new CategoryUpdatedEvent(this._id, this._name));
   }
 
   get name(): string {
