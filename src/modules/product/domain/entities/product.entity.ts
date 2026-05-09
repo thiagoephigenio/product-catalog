@@ -1,10 +1,12 @@
 import { BaseEntity } from '../../../../shared/domain/base-entity';
 import { ProductStatus } from '../enums/product-status.enum';
+import { ProductAttribute } from './product-attribute.vo';
 
 export class Product extends BaseEntity {
   private _name!: string;
   private _description?: string;
   private _status!: ProductStatus;
+  private _attributes!: ProductAttribute[];
 
   private constructor() {
     super();
@@ -25,5 +27,9 @@ export class Product extends BaseEntity {
 
   get status(): ProductStatus {
     return this._status;
+  }
+
+  get attributes(): ProductAttribute[] {
+    return [...this._attributes];
   }
 }
