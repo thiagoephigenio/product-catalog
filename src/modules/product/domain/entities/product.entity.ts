@@ -3,6 +3,12 @@ import { BaseEntity } from '../../../../shared/domain/base-entity';
 import { ProductStatus } from '../enums/product-status.enum';
 import { ProductAttribute } from './product-attribute.vo';
 import { ProductCreatedEvent } from '../events/product-created.event';
+import { ProductActivatedEvent } from '../events/product-activated.event';
+import { ProductArchivedEvent } from '../events/product-archived.event';
+import { MissingCategoryException } from '../exceptions/missing-category.exception';
+import { MissingAttributeException } from '../exceptions/missing-attribute.exception';
+import { ProductAlreadyActiveException } from '../exceptions/product-already-active.exception';
+import { ProductAlreadyArchivedException } from '../exceptions/product-already-archived.exception';
 
 interface CreateProductProps {
   name: string;
@@ -34,6 +40,32 @@ export class Product extends BaseEntity {
     product.addDomainEvent(new ProductCreatedEvent(product._id, product._name));
 
     return product;
+  }
+
+  activate(): void {
+    if (this._status === ProductStatus.ACTIVE) {
+      throw new ProductAlreadyActiveException();
+    }
+    if (this._categoryIds.length === 0) {
+      throw new MissingCategoryException();
+    }
+    if (this._attributes.length === 0) {
+      throw new MissingAttributeException();
+    }
+
+    this._status = ProductStatus.ACTIVE;
+    this._updatedAt = new Date();
+    this.addDomainEvent(new ProductActivatedEvent(this._id));
+  }
+
+  archive(): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ProductAlreadyArchivedException();
+    }
+
+    this._status = ProductStatus.ARCHIVED;
+    this._updatedAt = new Date();
+    this.addDomainEvent(new ProductArchivedEvent(this._id));
   }
 
   updateDescription(description: string): void {
