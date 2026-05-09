@@ -5,10 +5,15 @@ import { ProductAttribute } from './product-attribute.vo';
 import { ProductCreatedEvent } from '../events/product-created.event';
 import { ProductActivatedEvent } from '../events/product-activated.event';
 import { ProductArchivedEvent } from '../events/product-archived.event';
+import { AttributeAddedEvent } from '../events/attribute-added.event';
+import { AttributeUpdatedEvent } from '../events/attribute-updated.event';
+import { AttributeRemovedEvent } from '../events/attribute-removed.event';
 import { MissingCategoryException } from '../exceptions/missing-category.exception';
 import { MissingAttributeException } from '../exceptions/missing-attribute.exception';
 import { ProductAlreadyActiveException } from '../exceptions/product-already-active.exception';
 import { ProductAlreadyArchivedException } from '../exceptions/product-already-archived.exception';
+import { ProductArchivedException } from '../exceptions/product-archived.exception';
+import { DuplicateAttributeKeyException } from '../exceptions/duplicate-attribute-key.exception';
 
 interface CreateProductProps {
   name: string;
@@ -66,6 +71,41 @@ export class Product extends BaseEntity {
     this._status = ProductStatus.ARCHIVED;
     this._updatedAt = new Date();
     this.addDomainEvent(new ProductArchivedEvent(this._id));
+  }
+
+  addAttribute(key: string, value: string): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ProductArchivedException();
+    }
+    if (this._attributes.some((a) => a.key === key)) {
+      throw new DuplicateAttributeKeyException(key);
+    }
+
+    this._attributes.push(new ProductAttribute(key, value));
+    this._updatedAt = new Date();
+    this.addDomainEvent(new AttributeAddedEvent(this._id, key, value));
+  }
+
+  updateAttribute(key: string, value: string): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ProductArchivedException();
+    }
+
+    this._attributes = this._attributes.map((a) =>
+      a.key === key ? new ProductAttribute(key, value) : a,
+    );
+    this._updatedAt = new Date();
+    this.addDomainEvent(new AttributeUpdatedEvent(this._id, key, value));
+  }
+
+  removeAttribute(key: string): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ProductArchivedException();
+    }
+
+    this._attributes = this._attributes.filter((a) => a.key !== key);
+    this._updatedAt = new Date();
+    this.addDomainEvent(new AttributeRemovedEvent(this._id, key));
   }
 
   updateDescription(description: string): void {
