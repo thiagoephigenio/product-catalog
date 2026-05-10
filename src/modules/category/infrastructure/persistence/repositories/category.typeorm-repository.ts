@@ -35,6 +35,11 @@ export class CategoryTypeOrmRepository implements ICategoryRepository {
       .save(CategoryMapper.toOrm(category));
   }
 
+  async findAll(): Promise<Category[]> {
+    const orms = await this.dataSource.getRepository(CategoryOrmEntity).find();
+    return orms.map((orm) => CategoryMapper.toDomain(orm));
+  }
+
   async delete(id: string): Promise<void> {
     await this.dataSource.getRepository(CategoryOrmEntity).delete(id);
   }
