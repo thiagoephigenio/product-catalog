@@ -1,4 +1,6 @@
 import { Category } from './category.entity';
+import { CategoryCreatedEvent } from '../events/category-created.event';
+import { CategoryUpdatedEvent } from '../events/category-updated.event';
 import { SelfParentException } from '../exceptions/self-parent.exception';
 
 describe('Category', () => {
@@ -18,6 +20,14 @@ describe('Category', () => {
       });
 
       expect(category.parentId).toBe('parent-id');
+    });
+
+    it('should emit CategoryCreatedEvent on creation', () => {
+      const category = Category.create({ name: 'Eletrônicos' });
+      const events = category.pullDomainEvents();
+
+      expect(events).toHaveLength(1);
+      expect(events[0]).toBeInstanceOf(CategoryCreatedEvent);
     });
   });
 
