@@ -27,6 +27,13 @@ describe('Product', () => {
       expect(events).toHaveLength(1);
       expect(events[0]).toBeInstanceOf(ProductCreatedEvent);
     });
+
+    it('should start with empty categories and attributes', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+
+      expect(product.categoryIds).toHaveLength(0);
+      expect(product.attributes).toHaveLength(0);
+    });
   });
 
   describe('activate', () => {
