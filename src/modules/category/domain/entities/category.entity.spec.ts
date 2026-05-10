@@ -29,6 +29,14 @@ describe('Category', () => {
       expect(events).toHaveLength(1);
       expect(events[0]).toBeInstanceOf(CategoryCreatedEvent);
     });
+
+    it.only('should throw SelfParentException when parentId equals own id', () => {
+      const category = Category.create({ name: 'Eletrônicos' });
+
+      expect(() =>
+        category.update({ name: 'Eletrônicos', parentId: category.id }),
+      ).toThrow(SelfParentException);
+    });
   });
 
   describe('update', () => {
