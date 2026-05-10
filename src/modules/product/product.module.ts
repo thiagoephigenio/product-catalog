@@ -15,6 +15,8 @@ import { RemoveCategoryHandler } from './application/commands/remove-category/re
 import { AddAttributeHandler } from './application/commands/add-attribute/add-attribute.handler';
 import { UpdateAttributeHandler } from './application/commands/update-attribute/update-attribute.handler';
 import { RemoveAttributeHandler } from './application/commands/remove-attribute/remove-attribute.handler';
+import { GetProductHandler } from './application/queries/get-product/get-product.handler';
+import { ListProductsHandler } from './application/queries/list-products/list-products.handler';
 
 const commandHandlers = [
   CreateProductHandler,
@@ -28,6 +30,8 @@ const commandHandlers = [
   RemoveAttributeHandler,
 ];
 
+const queryHandlers = [GetProductHandler, ListProductsHandler];
+
 @Module({
   imports: [CqrsModule, CategoryModule],
   providers: [
@@ -35,6 +39,7 @@ const commandHandlers = [
     { provide: PRODUCT_EVENT_PUBLISHER, useClass: ProductEventPublisher },
     ProductDomainService,
     ...commandHandlers,
+    ...queryHandlers,
   ],
   exports: [PRODUCT_REPOSITORY],
 })
