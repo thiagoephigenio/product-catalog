@@ -14,6 +14,14 @@ interface UpdateCategoryProps {
   parentId?: string;
 }
 
+interface ReconstituteCategoryProps {
+  id: string;
+  name: string;
+  parentId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class Category extends BaseEntity {
   private _name!: string;
   private _parentId?: string;
@@ -34,6 +42,16 @@ export class Category extends BaseEntity {
       new CategoryCreatedEvent(category._id, category._name),
     );
 
+    return category;
+  }
+
+  static reconstitute(props: ReconstituteCategoryProps): Category {
+    const category = new Category();
+    category._id = props.id;
+    category._name = props.name;
+    category._parentId = props.parentId;
+    category._createdAt = props.createdAt;
+    category._updatedAt = props.updatedAt;
     return category;
   }
 

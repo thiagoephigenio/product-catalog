@@ -22,6 +22,17 @@ interface CreateProductProps {
   description?: string;
 }
 
+interface ReconstituteProductProps {
+  id: string;
+  name: string;
+  description?: string;
+  status: ProductStatus;
+  attributes: ProductAttribute[];
+  categoryIds: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class Product extends BaseEntity {
   private _name!: string;
   private _description?: string;
@@ -46,6 +57,19 @@ export class Product extends BaseEntity {
 
     product.addDomainEvent(new ProductCreatedEvent(product._id, product._name));
 
+    return product;
+  }
+
+  static reconstitute(props: ReconstituteProductProps): Product {
+    const product = new Product();
+    product._id = props.id;
+    product._name = props.name;
+    product._description = props.description;
+    product._status = props.status;
+    product._attributes = props.attributes;
+    product._categoryIds = props.categoryIds;
+    product._createdAt = props.createdAt;
+    product._updatedAt = props.updatedAt;
     return product;
   }
 
