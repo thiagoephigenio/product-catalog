@@ -22,6 +22,17 @@ describe('Category', () => {
   });
 
   describe('update', () => {
+    it('should update name and emit CategoryUpdatedEvent', () => {
+      const category = Category.create({ name: 'Eletrônicos' });
+      category.pullDomainEvents();
+
+      category.update({ name: 'Eletrônicos e Informática' });
+
+      expect(category.name).toBe('Eletrônicos e Informática');
+      const events = category.pullDomainEvents();
+      expect(events.some((e) => e instanceof CategoryUpdatedEvent)).toBe(true);
+    });
+
     it('should update parentId', () => {
       const category = Category.create({ name: 'Notebooks' });
       category.update({ name: 'Notebooks', parentId: 'new-parent-id' });
