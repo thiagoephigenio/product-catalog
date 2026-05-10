@@ -7,6 +7,7 @@ import { MissingCategoryException } from '../exceptions/missing-category.excepti
 import { MissingAttributeException } from '../exceptions/missing-attribute.exception';
 import { ProductAlreadyActiveException } from '../exceptions/product-already-active.exception';
 import { ProductAlreadyArchivedException } from '../exceptions/product-already-archived.exception';
+import { ProductArchivedException } from '../exceptions/product-archived.exception';
 
 describe('Product', () => {
   describe('create', () => {
@@ -82,6 +83,51 @@ describe('Product', () => {
       product.archive();
 
       expect(() => product.archive()).toThrow(ProductAlreadyArchivedException);
+    });
+  });
+
+  describe('addCategory', () => {
+    it('should add a category successfully', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addCategory('cat-1');
+
+      expect(product.categoryIds).toContain('cat-1');
+    });
+
+    it('should throw ProductArchivedException when archived', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+
+      expect(() => product.addCategory('cat-1')).toThrow(
+        ProductArchivedException,
+      );
+    });
+
+    it('should not add duplicate category', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addCategory('cat-1');
+      product.addCategory('cat-1');
+
+      expect(product.categoryIds).toHaveLength(1);
+    });
+  });
+
+  describe('removeCategory', () => {
+    it('should remove a category successfully', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addCategory('cat-1');
+      product.removeCategory('cat-1');
+
+      expect(product.categoryIds).not.toContain('cat-1');
+    });
+
+    it('should throw ProductArchivedException when archived', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+
+      expect(() => product.removeCategory('cat-1')).toThrow(
+        ProductArchivedException,
+      );
     });
   });
 });
