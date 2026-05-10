@@ -8,6 +8,7 @@ import { MissingAttributeException } from '../exceptions/missing-attribute.excep
 import { ProductAlreadyActiveException } from '../exceptions/product-already-active.exception';
 import { ProductAlreadyArchivedException } from '../exceptions/product-already-archived.exception';
 import { ProductArchivedException } from '../exceptions/product-archived.exception';
+import { DuplicateAttributeKeyException } from '../exceptions/duplicate-attribute-key.exception';
 
 describe('Product', () => {
   describe('create', () => {
@@ -128,6 +129,93 @@ describe('Product', () => {
       expect(() => product.removeCategory('cat-1')).toThrow(
         ProductArchivedException,
       );
+    });
+  });
+
+  describe('addAttribute', () => {
+    it('should add an attribute successfully', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addAttribute('color', 'black');
+
+      expect(product.attributes).toHaveLength(1);
+      expect(product.attributes[0].key).toBe('color');
+      expect(product.attributes[0].value).toBe('black');
+    });
+
+    it('should throw DuplicateAttributeKeyException for duplicate key', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addAttribute('color', 'black');
+
+      expect(() => product.addAttribute('color', 'white')).toThrow(
+        DuplicateAttributeKeyException,
+      );
+    });
+
+    it('should throw ProductArchivedException when archived', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+
+      expect(() => product.addAttribute('color', 'black')).toThrow(
+        ProductArchivedException,
+      );
+    });
+  });
+
+  describe('updateAttribute', () => {
+    it('should update an attribute value', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addAttribute('color', 'black');
+      product.updateAttribute('color', 'white');
+
+      expect(product.attributes[0].value).toBe('white');
+    });
+
+    it('should throw ProductArchivedException when archived', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+
+      expect(() => product.updateAttribute('color', 'white')).toThrow(
+        ProductArchivedException,
+      );
+    });
+  });
+
+  describe('removeAttribute', () => {
+    it('should remove an attribute successfully', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addAttribute('color', 'black');
+      product.removeAttribute('color');
+
+      expect(product.attributes).toHaveLength(0);
+    });
+
+    it('should throw ProductArchivedException when archived', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+
+      expect(() => product.removeAttribute('color')).toThrow(
+        ProductArchivedException,
+      );
+    });
+  });
+
+  describe('updateDescription', () => {
+    it('should update description even when archived', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+      product.updateDescription('Updated description');
+
+      expect(product.description).toBe('Updated description');
+    });
+
+    it('should update description on active product', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addCategory('cat-1');
+      product.addAttribute('color', 'black');
+      product.activate();
+      product.updateDescription('New description');
+
+      expect(product.description).toBe('New description');
     });
   });
 });
