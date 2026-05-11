@@ -30,7 +30,7 @@ describe('Category', () => {
       expect(events[0]).toBeInstanceOf(CategoryCreatedEvent);
     });
 
-    it.only('should throw SelfParentException when parentId equals own id', () => {
+    it('should throw SelfParentException when parentId equals own id', () => {
       const category = Category.create({ name: 'Eletrônicos' });
 
       expect(() =>
