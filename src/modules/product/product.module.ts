@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ProductController } from './presentation/controllers/product.controller';
 import { CategoryModule } from '../category/category.module';
 import { PRODUCT_REPOSITORY } from './domain/repositories/product.repository.interface';
 import { ProductTypeOrmRepository } from './infrastructure/persistence/repositories/product.typeorm-repository';
@@ -34,6 +35,7 @@ const queryHandlers = [GetProductHandler, ListProductsHandler];
 
 @Module({
   imports: [CqrsModule, CategoryModule],
+  controllers: [ProductController],
   providers: [
     { provide: PRODUCT_REPOSITORY, useClass: ProductTypeOrmRepository },
     { provide: PRODUCT_EVENT_PUBLISHER, useClass: ProductEventPublisher },
