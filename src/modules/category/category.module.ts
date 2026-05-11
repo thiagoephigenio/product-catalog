@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { BullModule } from '@nestjs/bullmq';
+import { AUDIT_QUEUE } from '../../audit/audit-event-payload.interface';
 import { CategoryController } from './presentation/controllers/category.controller';
 import { CATEGORY_REPOSITORY } from './domain/repositories/category.repository.interface';
 import { CategoryTypeOrmRepository } from './infrastructure/persistence/repositories/category.typeorm-repository';
@@ -14,7 +16,7 @@ const commandHandlers = [CreateCategoryHandler, UpdateCategoryHandler];
 const queryHandlers = [GetCategoryHandler, ListCategoriesHandler];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, BullModule.registerQueue({ name: AUDIT_QUEUE })],
   controllers: [CategoryController],
   providers: [
     { provide: CATEGORY_REPOSITORY, useClass: CategoryTypeOrmRepository },

@@ -1,18 +1,34 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq';
+import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductModule } from './modules/product/product.module';
 import { CategoryModule } from './modules/category/category.module';
+import { AuditModule } from './audit/audit.module';
 import { ProductOrmEntity } from './modules/product/infrastructure/persistence/entities/product.orm-entity';
 import { ProductAttributeOrmEntity } from './modules/product/infrastructure/persistence/entities/product-attribute.orm-entity';
 import { ProductCategoryOrmEntity } from './modules/product/infrastructure/persistence/entities/product-category.orm-entity';
 import { CategoryOrmEntity } from './modules/category/infrastructure/persistence/entities/category.orm-entity';
+import { AuditLogOrmEntity } from './audit/persistence/entities/audit-log.orm-entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    LoggerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        pinoHttp: {
+          level: config.get<string>('LOG_LEVEL', 'info'),
+          transport:
+            config.get<string>('NODE_ENV') !== 'production'
+              ? { target: 'pino-pretty', options: { colorize: true } }
+              : undefined,
+        },
+      }),
+    }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -30,12 +46,27 @@ import { CategoryOrmEntity } from './modules/category/infrastructure/persistence
           ProductAttributeOrmEntity,
           ProductCategoryOrmEntity,
           CategoryOrmEntity,
+          AuditLogOrmEntity,
         ],
         migrations: ['dist/database/migrations/*.js'],
       }),
     }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST', 'localhost'),
+          port: config.get<number>('REDIS_PORT', 6379),
+        },
+        defaultJobOptions: {
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 1000 },
+        },
+      }),
+    }),
     ProductModule,
     CategoryModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
