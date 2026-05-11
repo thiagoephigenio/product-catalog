@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { BullModule } from '@nestjs/bullmq';
+import { AUDIT_QUEUE } from '../../audit/audit-event-payload.interface';
 import { ProductController } from './presentation/controllers/product.controller';
 import { CategoryModule } from '../category/category.module';
 import { PRODUCT_REPOSITORY } from './domain/repositories/product.repository.interface';
@@ -34,7 +36,11 @@ const commandHandlers = [
 const queryHandlers = [GetProductHandler, ListProductsHandler];
 
 @Module({
-  imports: [CqrsModule, CategoryModule],
+  imports: [
+    CqrsModule,
+    CategoryModule,
+    BullModule.registerQueue({ name: AUDIT_QUEUE }),
+  ],
   controllers: [ProductController],
   providers: [
     { provide: PRODUCT_REPOSITORY, useClass: ProductTypeOrmRepository },
