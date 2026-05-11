@@ -9,6 +9,9 @@ services:
     environment:
       DATABASE_HOST: postgres
       REDIS_HOST: redis
+    command: >
+      sh -c "./node_modules/.bin/typeorm migration:run -d dist/database/typeorm.config.js
+      && node dist/main"
     depends_on:
       postgres:
         condition: service_healthy
