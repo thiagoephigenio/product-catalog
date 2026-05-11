@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { IProductRepository } from '../../../domain/repositories/product.repository.interface';
 import { Product } from '../../../domain/entities/product.entity';
 import { ProductOrmEntity } from '../entities/product.orm-entity';
@@ -79,6 +79,31 @@ export class ProductTypeOrmRepository implements IProductRepository {
         await em.save(ProductCategoryOrmEntity, catOrms);
       }
     });
+  }
+
+  async findAll(): Promise<Product[]> {
+    const productOrms = await this.dataSource
+      .getRepository(ProductOrmEntity)
+      .find();
+    if (productOrms.length === 0) return [];
+
+    const ids = productOrms.map((p) => p.id);
+    const [allAttributes, allProductCategories] = await Promise.all([
+      this.dataSource
+        .getRepository(ProductAttributeOrmEntity)
+        .findBy({ productId: In(ids) }),
+      this.dataSource
+        .getRepository(ProductCategoryOrmEntity)
+        .findBy({ productId: In(ids) }),
+    ]);
+
+    return productOrms.map((productOrm) =>
+      ProductMapper.toDomain(
+        productOrm,
+        allAttributes.filter((a) => a.productId === productOrm.id),
+        allProductCategories.filter((pc) => pc.productId === productOrm.id),
+      ),
+    );
   }
 
   async delete(id: string): Promise<void> {
