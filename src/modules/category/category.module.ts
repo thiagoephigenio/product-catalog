@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CategoryController } from './presentation/controllers/category.controller';
 import { CATEGORY_REPOSITORY } from './domain/repositories/category.repository.interface';
 import { CategoryTypeOrmRepository } from './infrastructure/persistence/repositories/category.typeorm-repository';
 import { CATEGORY_EVENT_PUBLISHER } from './application/ports/category-event-publisher.interface';
@@ -14,6 +15,7 @@ const queryHandlers = [GetCategoryHandler, ListCategoriesHandler];
 
 @Module({
   imports: [CqrsModule],
+  controllers: [CategoryController],
   providers: [
     { provide: CATEGORY_REPOSITORY, useClass: CategoryTypeOrmRepository },
     { provide: CATEGORY_EVENT_PUBLISHER, useClass: CategoryEventPublisher },
