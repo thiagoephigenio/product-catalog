@@ -8,6 +8,7 @@ import { MissingAttributeException } from '../exceptions/missing-attribute.excep
 import { ProductAlreadyActiveException } from '../exceptions/product-already-active.exception';
 import { ProductAlreadyArchivedException } from '../exceptions/product-already-archived.exception';
 import { ProductArchivedException } from '../exceptions/product-archived.exception';
+import { ArchivedProductNameChangeException } from '../exceptions/archived-product-name-change.exception';
 import { DuplicateAttributeKeyException } from '../exceptions/duplicate-attribute-key.exception';
 
 describe('Product', () => {
@@ -206,6 +207,34 @@ describe('Product', () => {
     });
   });
 
+  describe('updateName', () => {
+    it('should update name on a DRAFT product', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.updateName('Monitor 8K');
+
+      expect(product.name).toBe('Monitor 8K');
+    });
+
+    it('should update name on an ACTIVE product', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.addCategory('cat-1');
+      product.addAttribute('color', 'black');
+      product.activate();
+      product.updateName('Monitor 8K');
+
+      expect(product.name).toBe('Monitor 8K');
+    });
+
+    it('should throw ArchivedProductNameChangeException when trying to update name of an archived product', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+
+      expect(() => product.updateName('Monitor 8K')).toThrow(
+        ArchivedProductNameChangeException,
+      );
+    });
+  });
+
   describe('updateDescription', () => {
     it('should update description even when archived', () => {
       const product = Product.create({ name: 'Monitor 4K' });
@@ -223,6 +252,13 @@ describe('Product', () => {
       product.updateDescription('New description');
 
       expect(product.description).toBe('New description');
+    });
+
+    it('should update description on a DRAFT product', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.updateDescription('Draft description');
+
+      expect(product.description).toBe('Draft description');
     });
   });
 });

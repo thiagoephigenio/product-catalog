@@ -16,7 +16,12 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
     const product = await this.productRepository.findById(command.productId);
     if (!product) throw new ProductNotFoundException(command.productId);
 
-    product.updateDescription(command.description);
+    if (command.name !== undefined) {
+      product.updateName(command.name);
+    }
+    if (command.description !== undefined) {
+      product.updateDescription(command.description);
+    }
 
     await this.productRepository.save(product);
   }

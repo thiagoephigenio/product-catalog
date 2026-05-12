@@ -1,9 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateProductDto {
-  @ApiProperty({ example: 'Updated description' })
+  @ApiPropertyOptional({ example: 'Monitor 4K Pro' })
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  description!: string;
+  name?: string;
+
+  @ApiPropertyOptional({ example: 'Updated description' })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  description?: string;
 }

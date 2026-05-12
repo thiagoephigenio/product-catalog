@@ -16,6 +16,7 @@ import { ProductAlreadyActiveException } from '../exceptions/product-already-act
 import { ProductAlreadyArchivedException } from '../exceptions/product-already-archived.exception';
 import { ProductArchivedException } from '../exceptions/product-archived.exception';
 import { DuplicateAttributeKeyException } from '../exceptions/duplicate-attribute-key.exception';
+import { ArchivedProductNameChangeException } from '../exceptions/archived-product-name-change.exception';
 
 interface CreateProductProps {
   name: string;
@@ -155,6 +156,14 @@ export class Product extends BaseEntity {
     this._attributes = this._attributes.filter((a) => a.key !== key);
     this._updatedAt = new Date();
     this.addDomainEvent(new AttributeRemovedEvent(this._id, key));
+  }
+
+  updateName(name: string): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ArchivedProductNameChangeException();
+    }
+    this._name = name;
+    this._updatedAt = new Date();
   }
 
   updateDescription(description: string): void {

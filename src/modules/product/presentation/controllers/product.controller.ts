@@ -85,16 +85,19 @@ export class ProductController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Update product description' })
+  @ApiOperation({ summary: 'Update product name and/or description' })
   @ApiNoContentResponse({ description: 'Updated successfully' })
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiBadRequestResponse({ description: 'Validation error' })
+  @ApiUnprocessableEntityResponse({
+    description: 'Cannot update name of an archived product',
+  })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateProductDto,
   ): Promise<void> {
     await this.commandBus.execute(
-      new UpdateProductCommand(id, dto.description),
+      new UpdateProductCommand(id, dto?.name, dto.description),
     );
   }
 
