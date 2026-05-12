@@ -3,8 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { LoggerModule } from 'nestjs-pino';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ProductModule } from './modules/product/product.module';
 import { CategoryModule } from './modules/category/category.module';
 import { AuditModule } from './audit/audit.module';
@@ -70,7 +68,7 @@ import { AuditLogOrmEntity } from './audit/persistence/entities/audit-log.orm-en
     AuditModule,
     HealthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
