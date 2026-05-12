@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { BaseEntity } from '../../../../shared/domain/base-entity';
 import { ProductStatus } from '../enums/product-status.enum';
 import { ProductAttribute } from './product-attribute.vo';
@@ -46,7 +46,7 @@ export class Product extends BaseEntity {
 
   static create(props: CreateProductProps): Product {
     const product = new Product();
-    product._id = uuidv4();
+    product._id = randomUUID();
     product._name = props.name;
     product._description = props.description;
     product._status = ProductStatus.DRAFT;

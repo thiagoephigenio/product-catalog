@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { BaseEntity } from '../../../../shared/domain/base-entity';
 import { CategoryCreatedEvent } from '../events/category-created.event';
 import { CategoryUpdatedEvent } from '../events/category-updated.event';
@@ -32,7 +32,7 @@ export class Category extends BaseEntity {
 
   static create(props: CreateCategoryProps): Category {
     const category = new Category();
-    category._id = uuidv4();
+    category._id = randomUUID();
     category._name = props.name;
     category._parentId = props.parentId;
     category._createdAt = new Date();
