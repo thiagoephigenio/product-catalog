@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -22,6 +23,7 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { randomUUID } from 'crypto';
 import { CreateProductCommand } from '../../application/commands/create-product/create-product.command';
 import { ActivateProductCommand } from '../../application/commands/activate-product/activate-product.command';
 import { ArchiveProductCommand } from '../../application/commands/archive-product/archive-product.command';
@@ -55,9 +57,13 @@ export class ProductController {
     schema: { properties: { id: { type: 'string', format: 'uuid' } } },
   })
   @ApiBadRequestResponse({ description: 'Validation error' })
-  async create(@Body() dto: CreateProductDto): Promise<{ id: string }> {
+  async create(
+    @Headers('x-correlation-id') correlationId: string | undefined,
+    @Body() dto: CreateProductDto,
+  ): Promise<{ id: string }> {
+    const cid = correlationId ?? randomUUID();
     const id = await this.commandBus.execute<CreateProductCommand, string>(
-      new CreateProductCommand(dto.name, dto.description),
+      new CreateProductCommand(dto.name, dto.description, cid),
     );
     return { id };
   }
@@ -93,11 +99,13 @@ export class ProductController {
     description: 'Cannot update name of an archived product',
   })
   async update(
+    @Headers('x-correlation-id') correlationId: string | undefined,
     @Param('id') id: string,
     @Body() dto: UpdateProductDto,
   ): Promise<void> {
+    const cid = correlationId ?? randomUUID();
     await this.commandBus.execute(
-      new UpdateProductCommand(id, dto?.name, dto.description),
+      new UpdateProductCommand(id, dto?.name, dto.description, cid),
     );
   }
 
@@ -112,8 +120,12 @@ export class ProductController {
   @ApiUnprocessableEntityResponse({
     description: 'Missing category or attribute, or already active',
   })
-  async activate(@Param('id') id: string): Promise<void> {
-    await this.commandBus.execute(new ActivateProductCommand(id));
+  async activate(
+    @Headers('x-correlation-id') correlationId: string | undefined,
+    @Param('id') id: string,
+  ): Promise<void> {
+    const cid = correlationId ?? randomUUID();
+    await this.commandBus.execute(new ActivateProductCommand(id, cid));
   }
 
   @Post(':id/archive')
@@ -122,8 +134,12 @@ export class ProductController {
   @ApiNoContentResponse({ description: 'Product archived' })
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiUnprocessableEntityResponse({ description: 'Product already archived' })
-  async archive(@Param('id') id: string): Promise<void> {
-    await this.commandBus.execute(new ArchiveProductCommand(id));
+  async archive(
+    @Headers('x-correlation-id') correlationId: string | undefined,
+    @Param('id') id: string,
+  ): Promise<void> {
+    const cid = correlationId ?? randomUUID();
+    await this.commandBus.execute(new ArchiveProductCommand(id, cid));
   }
 
   @Post(':id/categories')
@@ -133,10 +149,14 @@ export class ProductController {
   @ApiNotFoundResponse({ description: 'Product or category not found' })
   @ApiUnprocessableEntityResponse({ description: 'Product is archived' })
   async addCategory(
+    @Headers('x-correlation-id') correlationId: string | undefined,
     @Param('id') id: string,
     @Body() dto: AddCategoryDto,
   ): Promise<void> {
-    await this.commandBus.execute(new AddCategoryCommand(id, dto.categoryId));
+    const cid = correlationId ?? randomUUID();
+    await this.commandBus.execute(
+      new AddCategoryCommand(id, dto.categoryId, cid),
+    );
   }
 
   @Delete(':id/categories/:categoryId')
@@ -146,10 +166,14 @@ export class ProductController {
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiUnprocessableEntityResponse({ description: 'Product is archived' })
   async removeCategory(
+    @Headers('x-correlation-id') correlationId: string | undefined,
     @Param('id') id: string,
     @Param('categoryId') categoryId: string,
   ): Promise<void> {
-    await this.commandBus.execute(new RemoveCategoryCommand(id, categoryId));
+    const cid = correlationId ?? randomUUID();
+    await this.commandBus.execute(
+      new RemoveCategoryCommand(id, categoryId, cid),
+    );
   }
 
   @Post(':id/attributes')
@@ -161,11 +185,13 @@ export class ProductController {
     description: 'Duplicate attribute key or product is archived',
   })
   async addAttribute(
+    @Headers('x-correlation-id') correlationId: string | undefined,
     @Param('id') id: string,
     @Body() dto: AddAttributeDto,
   ): Promise<void> {
+    const cid = correlationId ?? randomUUID();
     await this.commandBus.execute(
-      new AddAttributeCommand(id, dto.key, dto.value),
+      new AddAttributeCommand(id, dto.key, dto.value, cid),
     );
   }
 
@@ -176,12 +202,14 @@ export class ProductController {
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiUnprocessableEntityResponse({ description: 'Product is archived' })
   async updateAttribute(
+    @Headers('x-correlation-id') correlationId: string | undefined,
     @Param('id') id: string,
     @Param('key') key: string,
     @Body() dto: UpdateAttributeDto,
   ): Promise<void> {
+    const cid = correlationId ?? randomUUID();
     await this.commandBus.execute(
-      new UpdateAttributeCommand(id, key, dto.value),
+      new UpdateAttributeCommand(id, key, dto.value, cid),
     );
   }
 
@@ -192,9 +220,11 @@ export class ProductController {
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiUnprocessableEntityResponse({ description: 'Product is archived' })
   async removeAttribute(
+    @Headers('x-correlation-id') correlationId: string | undefined,
     @Param('id') id: string,
     @Param('key') key: string,
   ): Promise<void> {
-    await this.commandBus.execute(new RemoveAttributeCommand(id, key));
+    const cid = correlationId ?? randomUUID();
+    await this.commandBus.execute(new RemoveAttributeCommand(id, key, cid));
   }
 }

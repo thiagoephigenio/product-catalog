@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -20,6 +21,7 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { randomUUID } from 'crypto';
 import { CreateCategoryCommand } from '../../application/commands/create-category/create-category.command';
 import { UpdateCategoryCommand } from '../../application/commands/update-category/update-category.command';
 import { GetCategoryQuery } from '../../application/queries/get-category/get-category.query';
@@ -45,9 +47,13 @@ export class CategoryController {
   @ApiBadRequestResponse({ description: 'Validation error' })
   @ApiConflictResponse({ description: 'Category name already exists' })
   @ApiNotFoundResponse({ description: 'Parent category not found' })
-  async create(@Body() dto: CreateCategoryDto): Promise<{ id: string }> {
+  async create(
+    @Headers('x-correlation-id') correlationId: string | undefined,
+    @Body() dto: CreateCategoryDto,
+  ): Promise<{ id: string }> {
+    const cid = correlationId ?? randomUUID();
     const id = await this.commandBus.execute<CreateCategoryCommand, string>(
-      new CreateCategoryCommand(dto.name, dto.parentId),
+      new CreateCategoryCommand(dto.name, dto.parentId, cid),
     );
     return { id };
   }
@@ -85,11 +91,13 @@ export class CategoryController {
   })
   @ApiBadRequestResponse({ description: 'Validation error' })
   async update(
+    @Headers('x-correlation-id') correlationId: string | undefined,
     @Param('id') id: string,
     @Body() dto: UpdateCategoryDto,
   ): Promise<void> {
+    const cid = correlationId ?? randomUUID();
     await this.commandBus.execute(
-      new UpdateCategoryCommand(id, dto.name, dto.parentId),
+      new UpdateCategoryCommand(id, dto.name, dto.parentId, cid),
     );
   }
 }
