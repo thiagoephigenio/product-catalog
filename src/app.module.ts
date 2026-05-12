@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { ProductModule } from './modules/product/product.module';
 import { CategoryModule } from './modules/category/category.module';
 import { AuditModule } from './audit/audit.module';
+import { HealthModule } from './health/health.module';
 import { ProductOrmEntity } from './modules/product/infrastructure/persistence/entities/product.orm-entity';
 import { ProductAttributeOrmEntity } from './modules/product/infrastructure/persistence/entities/product-attribute.orm-entity';
 import { ProductCategoryOrmEntity } from './modules/product/infrastructure/persistence/entities/product-category.orm-entity';
@@ -67,6 +68,7 @@ import { AuditLogOrmEntity } from './audit/persistence/entities/audit-log.orm-en
     ProductModule,
     CategoryModule,
     AuditModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
