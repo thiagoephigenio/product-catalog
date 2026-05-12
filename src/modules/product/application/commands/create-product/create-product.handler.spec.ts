@@ -3,6 +3,7 @@ import { CreateProductCommand } from './create-product.command';
 import { ProductCreatedEvent } from '../../../domain/events/product-created.event';
 import { MockedFunction } from 'vitest/dist/index.js';
 import { IProductRepository } from 'src/modules/product/domain/repositories/product.repository.interface';
+import { PinoLogger } from 'nestjs-pino';
 
 describe('CreateProductHandler', () => {
   let handler: CreateProductHandler;
@@ -16,9 +17,16 @@ describe('CreateProductHandler', () => {
       save: vi.fn<IProductRepository['save']>().mockResolvedValue(undefined),
     };
     mockPublisher = { publish: vi.fn().mockResolvedValue(undefined) };
+    const mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    } as unknown as PinoLogger;
     handler = new CreateProductHandler(
       mockRepo as unknown as IProductRepository,
       mockPublisher,
+      mockLogger,
     );
   });
 

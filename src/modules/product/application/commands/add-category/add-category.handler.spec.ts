@@ -8,6 +8,7 @@ import { CategoryAddedEvent } from '../../../domain/events/category-added.event'
 import type { IProductRepository } from '../../../domain/repositories/product.repository.interface';
 import type { IProductEventPublisher } from '../../ports/product-event-publisher.interface';
 import type { ICategoryRepository } from '../../../../category/domain/repositories/category.repository.interface';
+import { PinoLogger } from 'nestjs-pino';
 
 const makeDraftProduct = () =>
   Product.reconstitute({
@@ -56,10 +57,17 @@ describe('AddCategoryHandler', () => {
       publish: publish,
     };
 
+    const mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    } as unknown as PinoLogger;
     handler = new AddCategoryHandler(
       mockProductRepo,
       mockCategoryRepo,
       mockPublisher,
+      mockLogger,
     );
   });
 

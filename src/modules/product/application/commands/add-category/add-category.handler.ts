@@ -1,5 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { AddCategoryCommand } from './add-category.command';
 import type { IProductRepository } from '../../../domain/repositories/product.repository.interface';
 import { PRODUCT_REPOSITORY } from '../../../domain/repositories/product.repository.interface';
@@ -19,9 +20,12 @@ export class AddCategoryHandler implements ICommandHandler<AddCategoryCommand> {
     private readonly categoryRepository: ICategoryRepository,
     @Inject(PRODUCT_EVENT_PUBLISHER)
     private readonly eventPublisher: IProductEventPublisher,
+    @InjectPinoLogger(AddCategoryHandler.name)
+    private readonly logger: PinoLogger,
   ) {}
 
   async execute(command: AddCategoryCommand): Promise<void> {
+    const start = Date.now();
     const [product, category] = await Promise.all([
       this.productRepository.findById(command.productId),
       this.categoryRepository.findById(command.categoryId),
@@ -34,5 +38,13 @@ export class AddCategoryHandler implements ICommandHandler<AddCategoryCommand> {
 
     await this.productRepository.save(product);
     await this.eventPublisher.publish(product.pullDomainEvents());
+    const logContext: Record<string, unknown> = {
+      action: 'product.add-category',
+      productId: command.productId,
+      categoryId: command.categoryId,
+      correlationId: command.correlationId,
+      durationMs: Date.now() - start,
+    };
+    this.logger.info(logContext, 'Category added to product');
   }
 }

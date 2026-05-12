@@ -56,7 +56,17 @@ describe('ArchiveProductHandler', () => {
       publish: publish,
     };
 
-    handler = new ArchiveProductHandler(mockRepo, mockPublisher);
+    const mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    };
+    handler = new ArchiveProductHandler(
+      mockRepo,
+      mockPublisher,
+      mockLogger as never,
+    );
   });
 
   it('should throw ProductNotFoundException when product does not exist', async () => {
