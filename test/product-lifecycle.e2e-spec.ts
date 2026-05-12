@@ -4,7 +4,6 @@ import { DataSource } from 'typeorm';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { DomainExceptionFilter } from '../src/shared/exceptions/domain-exception.filter';
 import { CategoryResponseDto } from 'src/modules/category/presentation/dtos/category-response.dto';
 import { ProductResponseDto } from 'src/modules/product/presentation/dtos/product-response.dto';
 
@@ -32,7 +31,6 @@ describe('Product Lifecycle (e2e)', () => {
         transform: true,
       }),
     );
-    app.useGlobalFilters(new DomainExceptionFilter());
     await app.init();
 
     dataSource = module.get(DataSource);
