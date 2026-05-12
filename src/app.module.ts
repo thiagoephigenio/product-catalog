@@ -1,3 +1,4 @@
+import { APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,6 +8,7 @@ import { ProductModule } from './modules/product/product.module';
 import { CategoryModule } from './modules/category/category.module';
 import { AuditModule } from './audit/audit.module';
 import { HealthModule } from './health/health.module';
+import { DomainExceptionFilter } from './shared/exceptions/domain-exception.filter';
 import { ProductOrmEntity } from './modules/product/infrastructure/persistence/entities/product.orm-entity';
 import { ProductAttributeOrmEntity } from './modules/product/infrastructure/persistence/entities/product-attribute.orm-entity';
 import { ProductCategoryOrmEntity } from './modules/product/infrastructure/persistence/entities/product-category.orm-entity';
@@ -69,6 +71,6 @@ import { AuditLogOrmEntity } from './audit/persistence/entities/audit-log.orm-en
     HealthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
 })
 export class AppModule {}

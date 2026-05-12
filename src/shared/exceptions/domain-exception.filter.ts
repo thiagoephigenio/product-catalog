@@ -4,15 +4,36 @@ import {
   ExceptionFilter,
   HttpStatus,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { Request, Response } from 'express';
 import { DomainException } from './domain.exception';
 
 @Catch(DomainException)
 export class DomainExceptionFilter implements ExceptionFilter {
+  constructor(
+    @InjectPinoLogger(DomainExceptionFilter.name)
+    private readonly logger: PinoLogger,
+  ) {}
+
   catch(exception: DomainException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
+    const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
     const status = this.resolveStatus(exception);
+
+    const correlationId = request.headers['x-correlation-id'] as
+      | string
+      | undefined;
+    const logLevel = status >= 500 ? 'error' : 'warn';
+
+    this.logger[logLevel](
+      {
+        action: `${request.method.toLowerCase()} ${request.path}`,
+        correlationId,
+        error: exception.name,
+      },
+      exception.message,
+    );
 
     response.status(status).json({
       statusCode: status,
