@@ -1,5 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { UpdateProductCommand } from './update-product.command';
 import type { IProductRepository } from '../../../domain/repositories/product.repository.interface';
 import { PRODUCT_REPOSITORY } from '../../../domain/repositories/product.repository.interface';
@@ -10,9 +11,12 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
   constructor(
     @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: IProductRepository,
+    @InjectPinoLogger(UpdateProductHandler.name)
+    private readonly logger: PinoLogger,
   ) {}
 
   async execute(command: UpdateProductCommand): Promise<void> {
+    const start = Date.now();
     const product = await this.productRepository.findById(command.productId);
     if (!product) throw new ProductNotFoundException(command.productId);
 
@@ -24,5 +28,12 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
     }
 
     await this.productRepository.save(product);
+    const logContext: Record<string, unknown> = {
+      action: 'product.update',
+      productId: command.productId,
+      correlationId: command.correlationId,
+      durationMs: Date.now() - start,
+    };
+    this.logger.info(logContext, 'Product updated');
   }
 }
