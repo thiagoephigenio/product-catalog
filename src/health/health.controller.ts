@@ -21,7 +21,7 @@ export class HealthController {
   @ApiOperation({ summary: 'Check service health (PostgreSQL + Redis)' })
   check() {
     return this.health.check([
-      () => this.db.pingCheck('postgres'),
+      () => this.db.pingCheck('postgres', { timeout: 3000 }),
       () => this.redis.isHealthy('redis'),
     ]);
   }
