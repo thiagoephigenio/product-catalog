@@ -1,5 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { UpdateCategoryCommand } from './update-category.command';
 import type { ICategoryRepository } from '../../../domain/repositories/category.repository.interface';
 import { CATEGORY_REPOSITORY } from '../../../domain/repositories/category.repository.interface';
@@ -15,9 +16,12 @@ export class UpdateCategoryHandler implements ICommandHandler<UpdateCategoryComm
     private readonly categoryRepository: ICategoryRepository,
     @Inject(CATEGORY_EVENT_PUBLISHER)
     private readonly eventPublisher: ICategoryEventPublisher,
+    @InjectPinoLogger(UpdateCategoryHandler.name)
+    private readonly logger: PinoLogger,
   ) {}
 
   async execute(command: UpdateCategoryCommand): Promise<void> {
+    const start = Date.now();
     const category = await this.categoryRepository.findById(command.categoryId);
     if (!category) throw new CategoryNotFoundException(command.categoryId);
 
@@ -35,5 +39,12 @@ export class UpdateCategoryHandler implements ICommandHandler<UpdateCategoryComm
 
     await this.categoryRepository.save(category);
     await this.eventPublisher.publish(category.pullDomainEvents());
+    const logContext: Record<string, unknown> = {
+      action: 'category.update',
+      categoryId: command.categoryId,
+      correlationId: command.correlationId,
+      durationMs: Date.now() - start,
+    };
+    this.logger.info(logContext, 'Category updated');
   }
 }

@@ -9,6 +9,7 @@ import { ProductActivatedEvent } from '../../../domain/events/product-activated.
 import { MockedFunction } from 'vitest/dist/index.js';
 import { IProductRepository } from 'src/modules/product/domain/repositories/product.repository.interface';
 import { ProductDomainService } from 'src/modules/product/domain/services/product-domain.service';
+import { PinoLogger } from 'nestjs-pino';
 
 const makeActivatableProduct = () =>
   Product.reconstitute({
@@ -43,10 +44,17 @@ describe('ActivateProductHandler', () => {
     mockDomainService = {
       checkNameUniqueness: vi.fn().mockResolvedValue(undefined),
     };
+    const mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    } as unknown as PinoLogger;
     handler = new ActivateProductHandler(
       mockRepo as unknown as IProductRepository,
       mockPublisher,
       mockDomainService as unknown as ProductDomainService,
+      mockLogger,
     );
   });
 
