@@ -64,7 +64,23 @@ npm install
 cp .env.example .env
 ```
 
-O `.env` gerado já contém os valores padrão para rodar localmente o projeto
+O `.env` gerado já contém os valores padrão para rodar localmente o projeto:
+
+```env
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=catalog
+DATABASE_USER=catalog
+DATABASE_PASSWORD=catalog
+DATABASE_SYNCHRONIZE=false
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+PORT=3000
+NODE_ENV=development
+LOG_LEVEL=info
+```
 
 ## Rodando localmente
 
