@@ -3,6 +3,8 @@ import { config } from 'dotenv';
 
 config();
 
+const isCompiled = __filename.endsWith('.js');
+
 export default new DataSource({
   type: 'postgres',
   host: process.env.DATABASE_HOST ?? 'localhost',
@@ -12,7 +14,11 @@ export default new DataSource({
   database: process.env.DATABASE_NAME ?? 'catalog',
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',
-  entities: ['src/**/*.orm-entity.ts'],
-  migrations: ['src/database/migrations/*.ts'],
+  entities: isCompiled
+    ? ['dist/**/*.orm-entity.js']
+    : ['src/**/*.orm-entity.ts'],
+  migrations: isCompiled
+    ? ['dist/database/migrations/*.js']
+    : ['src/database/migrations/*.ts'],
   migrationsTableName: 'migrations',
 });
