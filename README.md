@@ -14,7 +14,7 @@ API REST para catálogo de produtos internos.
 | CQRS | @nestjs/cqrs |
 | Logging | nestjs-pino + pino-pretty |
 | Testes unitários | Vitest |
-| Testes e2e | Vitest + SWC + Supertest |
+| Testes integração | Vitest + SWC + Supertest |
 | Documentação | Swagger (@nestjs/swagger) |
 | Health Check | @nestjs/terminus |
 
@@ -104,12 +104,16 @@ Para acessar o Swagger em: `http://localhost:3000/docs`
 # Unitários
 npm run test
 
-# E2e (necessário postgres e redis rodando)
+# Integração (necessário postgres e redis rodando)
 npm run test:e2e
 
 # Cobertura
 npm run test:cov
 ```
+
+### Cobertura dos testes de integração
+
+- Ciclo completo do produto: criar → adicionar categoria → adicionar atributo → ativar → verificar status `ACTIVE`
 
 ## Rodando com Docker
 
