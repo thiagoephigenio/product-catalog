@@ -17,6 +17,7 @@ import { ProductAlreadyArchivedException } from '../exceptions/product-already-a
 import { ProductArchivedException } from '../exceptions/product-archived.exception';
 import { DuplicateAttributeKeyException } from '../exceptions/duplicate-attribute-key.exception';
 import { ArchivedProductNameChangeException } from '../exceptions/archived-product-name-change.exception';
+import { ProductCannotReactivateArchivedException } from '../exceptions/product-cannot-reactivate-archived.exception';
 
 interface CreateProductProps {
   name: string;
@@ -75,6 +76,9 @@ export class Product extends BaseEntity {
   }
 
   activate(): void {
+    if (this._status === ProductStatus.ARCHIVED) {
+      throw new ProductCannotReactivateArchivedException();
+    }
     if (this._status === ProductStatus.ACTIVE) {
       throw new ProductAlreadyActiveException();
     }

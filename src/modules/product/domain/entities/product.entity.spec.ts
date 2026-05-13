@@ -10,6 +10,7 @@ import { ProductAlreadyArchivedException } from '../exceptions/product-already-a
 import { ProductArchivedException } from '../exceptions/product-archived.exception';
 import { ArchivedProductNameChangeException } from '../exceptions/archived-product-name-change.exception';
 import { DuplicateAttributeKeyException } from '../exceptions/duplicate-attribute-key.exception';
+import { ProductCannotReactivateArchivedException } from '../exceptions/product-cannot-reactivate-archived.exception';
 
 describe('Product', () => {
   describe('create', () => {
@@ -38,6 +39,15 @@ describe('Product', () => {
   });
 
   describe('activate', () => {
+    it('should throw a ProductCannotReactivateArchivedException when the product is archived', () => {
+      const product = Product.create({ name: 'Monitor 4K' });
+      product.archive();
+
+      expect(() => product.activate()).toThrow(
+        ProductCannotReactivateArchivedException,
+      );
+    });
+
     it('should throw MissingCategoryException when no categories', () => {
       const product = Product.create({ name: 'Monitor 4K' });
       product.addAttribute('color', 'black');
